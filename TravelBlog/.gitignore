@@ -24,6 +24,7 @@ Bin/
 obj/
 Obj/
 
+
 # Visual Studio 2015 cache/options directory
 .vs/
 /wwwroot/dist/
@@ -156,6 +157,8 @@ csx/
 # Microsoft Azure Emulator
 ecf/
 rcf/
+
+appsettings.Development.json
 
 # Microsoft Azure ApplicationInsights config file
 ApplicationInsights.config

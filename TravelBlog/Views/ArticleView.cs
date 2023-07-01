@@ -10,16 +10,16 @@ namespace TravelBlog.Views
         public List<Remark> Remarks {get; set;}
         public List<Image> Images {get; set;}
 
-        public ArticleView(Article _Article) {
-            MainArticle = _Article; 
+        public ArticleView(Article article) {
+            MainArticle = article; 
             Remarks = new List<Remark>(); 
             Images = new List<Image>(); 
         }
         
-        public ArticleView(Article _Article, List<Remark> _Remarks, List<Image> _Images) {
-            MainArticle = _Article; 
-            Remarks = _Remarks; 
-            Images = _Images; 
+        public ArticleView(Article article, List<Remark> remarks, List<Image> images) {
+            MainArticle = article; 
+            Remarks = remarks; 
+            Images = images; 
         }
     }
 }

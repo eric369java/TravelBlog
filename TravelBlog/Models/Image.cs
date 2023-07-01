@@ -11,14 +11,14 @@ namespace TravelBlog.Models
         public string Caption {get; set;}
         public string Country {get; set;}
         public string PlaceId {get; set;}
-    
-        public Image(string _ImageId, string _ParentArticleId, string _ImageUrl, string _Caption, string _Country, string _PlaceId) {
-            ImageId = _ImageId;
-            ParentArticleId = _ParentArticleId;
-            ImageUrl = _ImageUrl; 
-            Caption = _Caption; 
-            Country = _Country; 
-            PlaceId = _PlaceId; 
+
+        public Image(string imageId, string parentArticleId, string imageUrl, string caption, string country, string placeId) {
+            ImageId = imageId;
+            ParentArticleId = parentArticleId;
+            ImageUrl = imageUrl; 
+            Caption = caption; 
+            Country = country; 
+            PlaceId = placeId; 
         }   
 
     }

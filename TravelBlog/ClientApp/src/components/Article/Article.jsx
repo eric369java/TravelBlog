@@ -39,6 +39,7 @@ const Article = (props) => {
             return res.json(); 
         })
         .then((data) => {
+            console.log(data); 
             setData(data); 
             setFocusSection(0); 
             setLoading(false); 
