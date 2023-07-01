@@ -1,75 +1,99 @@
-import React, { Component, useState } from 'react';
-
-
-//Loads text from a txt file. Filename input as props. 
-//Street view and regular Google Maps api 
-//users can pin the article to their list. 
-//Flights API
-//Title
-//History 
-//Transportation & Tips 
-//Photo Album 
-//export pdf
-//Json object : ID, Title, Array of json files 
-//Sub component location : ID, Title, google map coords, text body  . Prefecture / Region above city 
+import React, { useState, useRef, useEffect } from 'react';
+import "./Article.css"; 
 
 const Article = (props) => {   
     const [data, setData] = useState(null); 
+    const [focusSection, setFocusSection] = useState(null); 
+    const [loading, setLoading] = useState(true); 
     const sectionRefs = useRef([]); 
+    const scrollLock = useRef(false); 
+    const scrollLockId = useRef(0); 
 
-    const scrollToSection = (placeId) => {
-        sectionRefs.current[placeId]?.scrollIntoView({behavior: "instant", block: "start"}); 
-    }
+    const scrollToSection = (index) => {
+        //TODO: Use scrollEnd once it's on most browsers. 
+        clearTimeout(scrollLockId.current); 
+        scrollLock.current = true; 
+        setFocusSection(index); 
+        sectionRefs.current[index]?.scrollIntoView({behavior: "instant", block: "start"}); 
+        scrollLockId.current = setTimeout(() => {scrollLock.current = false}, sectionRefs.current.length * 150); 
+    };
+
+    const onScroll = () => {
+        if(!scrollLock.current) {
+            let min = Number.MAX_VALUE; 
+            let topIndex = 0; 
+            for(let i = 0; i < sectionRefs.current.length; i++) {
+                let top = sectionRefs.current[i].getBoundingClientRect().top; 
+                if(top <= min && top >= 0) {
+                    min = top;
+                    topIndex = i; 
+                }
+            }
+            setFocusSection(topIndex); 
+        }
+    };
 
     useEffect(() => {
-        fetch(`articles/${props.articleId}`)
-        .then((res) => res.json())
+        fetch(`article/${props.articleId}`)
+        .then((res) => {
+            return res.json(); 
+        })
         .then((data) => {
             setData(data); 
-            data.sections.forEach((section) => {
-                sectionRefs.push(section.placeId); 
-            })
-        }); 
+            setFocusSection(0); 
+            setLoading(false); 
+            window.removeEventListener('scroll', onScroll);
+            window.addEventListener('scroll', onScroll, { passive: true});
+        });  
     }, []); 
 
     
-    const sideBarItems = data.sections.map((section, index) => {
+    const sideBarItems = loading? [] : data.sections.map((section, index) => {
         return(
-            <li key={index}>
-                <input type="button" onClick={() => scrollToSection(section.placeId)}>{section.subtitle}</input>
+            <li key={index} className='section-ref-container'>
+                <button className={index === focusSection ? "section-ref-item selected" : "section-ref-item"} onClick={() => scrollToSection(index)}>{section.subtitle}</button>
             </li>
         )
     });
 
     //compose paragraphs into sections and sections into article
-    const sections = data.sections.map((section) => {
+    const sections = loading? [] : data.sections.map((section) => {
         const paragraphs = section.paragraphs.map((paragraph, index) => {
-            const item = paragraph.contains("src=") ? <p>{paragraph}</p> : <img src={paragraph.replace("src=", "")}></img>; 
+            const item = !paragraph.includes("src=") ? <p>{paragraph}</p> : <img src={paragraph.replace("src=", "")} alt="Missing Image"></img>; 
             return (<li key={index}>{item} </li>); 
         }); 
 
-        return(<li key={section.placeId} ref={section.placeId}> 
-            <h2>{section.subtitle}</h2>
+        return(<li key={section.placeId} ref={ref => {
+            if(sectionRefs.current.length < data.sections.length) {
+                sectionRefs.current.push(ref);
+            }}}> 
+            <span className="section-title">{section.subtitle}</span>
+            <hr></hr>
             {/**Google Maps Embed */}
-            <ul>{paragraphs}</ul> 
+            <ul className='paragraph-list'>{paragraphs}</ul> 
         </li>); 
     });
     
     return (
-        <div className="article">
-            <div className="main-article">
-                <h1>{data.title}</h1>
-                <i>Last Visited `${data.publishDate}`</i>
-                <p>{data.introduction}</p>
-                <div>{/**Google maps routes embed */}</div>
-                <ul>{sections}</ul>
-            </div>
-            <div>
-                <h3>{data.region}</h3>
-                <ul>
-                    {sideBarItems}
-                </ul>
+        loading? null : <div className="article">
+            <img src="/Onomichi-Dock.jpg" className="title-container"/>
+            <div className="article-container">
+                <div className="main-article">
+                    <span className="title">{data.title}</span>
+                    <i>Last Visited `${data.publishDate}`</i>
+                    <p>{data.introduction}</p>
+                    <div>{/**Google maps routes embed */}</div>
+                    <ul className="section-list">{sections}</ul>
+                </div>
+                <div className="side-bar-menu">
+                    <h4>{data.title}</h4>
+                    <ul className="side-bar-items-list">
+                        {sideBarItems}
+                    </ul>
+                </div>
             </div>
         </div>
     );
-}
+};
+
+export default Article; 
