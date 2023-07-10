@@ -13,6 +13,8 @@ namespace TravelBlog.Data
 
         public DbSet<Remark> Remarks {get; set;}
 
+        public DbSet<Paragraph> Paragraphs {get; set;}
+
         public DbSet<Image> Images {get; set;}
     }
 }

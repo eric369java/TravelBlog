@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq; 
 using TravelBlog.Data; 
 using TravelBlog.Models; 
-using TravelBlog.Views; 
 
 namespace TravelBlog.Controllers;
 
@@ -17,61 +16,23 @@ public class ArticleController : ControllerBase
         Context = _Context; 
     }
 
-    [HttpGet("{id:string}")]
-    public ActionResult<ArticleView> Get(string id) 
+    [HttpGet("{id:int}")]
+    public Article Get(int id) 
     {   
         /*
-        TODO: Error Handling and Input valid
+        TODO: 
+        -Error Handling and Input valid
+        -Load images on seperate API 
+        -Id of article is coordinates
+        -Translation of api string to int ids 
         */ 
-
-        var QueryResult = 
-            from a in Context.Articles
-            where a.ArticleId == id 
-            join r in Context.Remarks on a.ArticleId equals r.ParentArticleId into group1
-            from g1 in group1.DefaultIfEmpty()
-            join i in Context.Images on g1.ParentArticleId equals i.ParentArticleId into group2 
-            from g2 in group2.DefaultIfEmpty()
-            select new {
-                ArticleId = a.ArticleId,
-                Title = a.Title, 
-                PublishDate = a.PublishDate, 
-                Continent = a.Continent, 
-                Country = a.Country, 
-                Introduction = a.Introduction,
-                Background = a.Background, 
-                CoverImage = a.CoverImage,
-                RemarkId = g1 == null ? g1.RemarkId : string.Empty, 
-                RemarkType = g1 == null ? g1.Type : string.Empty, 
-                RemarkText = g1 == null ? g1.Text : string.Empty,
-                ImageId = g2 == null ? g2.ImageId : string.Empty, 
-                ImageUrl = g2 == null ? g2.ImageUrl : string.Empty, 
-                Caption = g2 == null ? g2.Caption : string.Empty,
-                PlaceId = g2 == null ? g2.PlaceId : string.Empty
-            }; 
+        var QueryResult = Context.Articles.Where(
+            article => article.Id == id
+        ).Include(
+            article => article.Paragraphs.Where(paragraph => paragraph.ArticleId == id)
+        ).FirstOrDefault(); 
         
-
-        //Create Main Article 
-        var FirstItem = QueryResult.First(); 
-        Article Article = new Article(FirstItem.ArticleId, FirstItem.Title, FirstItem.PublishDate, FirstItem.Continent,
-            FirstItem.Country, FirstItem.Introduction, FirstItem.Background, FirstItem.CoverImage); 
-        ArticleView ArticleView = new ArticleView(Article); 
-
-        //If Image exists, add to Images
-        //If Remark hasn't been seen before, add to Remarks
-        HashSet<string> RemarkSet = new HashSet<string>(); 
-        foreach(var item in QueryResult) {
-            
-            if(item.ImageId != null) {
-                ArticleView.Images.Add(new Image(item.ImageId, item.ArticleId, item.ImageUrl, item.Caption, item.Country, item.PlaceId)); 
-            }
-
-            if(!RemarkSet.Contains(item.RemarkId)) {
-                ArticleView.Remarks.Add(new Remark(item.RemarkId, item.RemarkType, item.ArticleId, item.RemarkText)); 
-                RemarkSet.Add(item.RemarkId); 
-            }
-        }
-
-        return ArticleView; 
+        return QueryResult; 
     }
 
 }

@@ -24,12 +24,11 @@ namespace TravelBlog.Migrations
 
             modelBuilder.Entity("TravelBlog.Models.Article", b =>
                 {
-                    b.Property<string>("ArticleId")
-                        .HasColumnType("text");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
 
-                    b.Property<string>("Background")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Continent")
                         .IsRequired()
@@ -54,15 +53,18 @@ namespace TravelBlog.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("ArticleId");
+                    b.HasKey("Id");
 
                     b.ToTable("Articles");
                 });
 
             modelBuilder.Entity("TravelBlog.Models.Image", b =>
                 {
-                    b.Property<string>("ImageId")
-                        .HasColumnType("text");
+                    b.Property<int>("ImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ImageId"));
 
                     b.Property<string>("Caption")
                         .IsRequired()
@@ -76,9 +78,8 @@ namespace TravelBlog.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ParentArticleId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("ParentArticleId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("PlaceId")
                         .IsRequired()
@@ -89,14 +90,42 @@ namespace TravelBlog.Migrations
                     b.ToTable("Images");
                 });
 
-            modelBuilder.Entity("TravelBlog.Models.Remark", b =>
+            modelBuilder.Entity("TravelBlog.Models.Paragraph", b =>
                 {
-                    b.Property<string>("RemarkId")
-                        .HasColumnType("text");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
 
-                    b.Property<string>("ParentArticleId")
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SubTitle")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.ToTable("Paragraphs");
+                });
+
+            modelBuilder.Entity("TravelBlog.Models.Remark", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -106,9 +135,40 @@ namespace TravelBlog.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("RemarkId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
 
                     b.ToTable("Remarks");
+                });
+
+            modelBuilder.Entity("TravelBlog.Models.Paragraph", b =>
+                {
+                    b.HasOne("TravelBlog.Models.Article", "Article")
+                        .WithMany("Paragraphs")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+                });
+
+            modelBuilder.Entity("TravelBlog.Models.Remark", b =>
+                {
+                    b.HasOne("TravelBlog.Models.Article", "Article")
+                        .WithMany("Remarks")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+                });
+
+            modelBuilder.Entity("TravelBlog.Models.Article", b =>
+                {
+                    b.Navigation("Paragraphs");
+
+                    b.Navigation("Remarks");
                 });
 #pragma warning restore 612, 618
         }

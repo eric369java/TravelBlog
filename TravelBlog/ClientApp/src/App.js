@@ -10,7 +10,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <Article /> 
+      <Article articleId={56436}/> 
       // <Layout>
       //   <Routes>
       //     {AppRoutes.map((route, index) => {
